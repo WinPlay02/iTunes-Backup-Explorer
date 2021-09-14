@@ -54,7 +54,8 @@ public class WindowController {
 
         this.tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
             Node tabPage = newTab.getContent();
-            if (this.lockedTabPages.contains(tabPage) && !this.tryUnlock()) this.tabPane.getSelectionModel().select(oldTab);
+            if (this.lockedTabPages.contains(tabPage) && this.selectedBackup != null && !this.tryUnlock())
+                this.tabPane.getSelectionModel().select(oldTab);
             else if (tabPage == this.filesTabPage) this.filesTabPageController.tabShown(this.selectedBackup);
             else if (tabPage == this.fileSearchTabPage) this.fileSearchTabPageController.tabShown(this.selectedBackup);
         });
@@ -68,6 +69,7 @@ public class WindowController {
 
     public void loadBackups() {
         this.backups = ITunesBackup.getBackups(new File(System.getenv("APPDATA"), "Apple Computer\\MobileSync\\Backup"));
+        this.backups.addAll(ITunesBackup.getBackups(new File(System.getenv("USERPROFILE"), "Apple\\MobileSync\\Backup")));
         this.backups.forEach(backup -> {
             ToggleButton backupEntry = new ToggleButton(backup.manifest.deviceName + "\n" + BACKUP_DATE_FMT.format(backup.manifest.date));
             backupEntry.getStyleClass().add("sidebar-button");
